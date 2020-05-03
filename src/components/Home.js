@@ -1,5 +1,5 @@
 import React, { Component, Suspense } from 'react';
-import { Canvas, useThree, extend } from 'react-three-fiber';
+import { Canvas, useThree, extend, useFrame } from 'react-three-fiber';
 /* import { DefaultThing } from './objects/DefaultObject';
 import { DefaultTextObject } from './objects/DefaultTextObject'; */
 import { Damier } from './objects/Damier';
@@ -13,12 +13,13 @@ const Scene = () => {
         gl: { domElement }
     } = useThree();
 
+
     return (
         <>
             <group>
-                <Damier></Damier>
+                <Damier camera={camera}></Damier>
             </group>
-            <orbitControls args={[camera, domElement]} />
+            {/* <orbitControls args={[camera, domElement]} /> */}
         </>
     )
 }
@@ -26,10 +27,16 @@ const Scene = () => {
 class Home extends Component {
 
     render() {
+        let cameraXPos = 1;
+
         return (
             <div className="home-container">
                 <div className="canvas-container">
-                    <Canvas gl={{ antialias: false, alpha: false }} camera={{ position: [0, 0, 15] }} onCreated={({ gl }) => gl.setClearColor('lightpink')}>
+                    <Canvas gl={{ antialias: false, alpha: false }} camera={{ position: [cameraXPos, 0, 15] }} onCreated={({ gl, camera }) => {
+                        console.log(camera)
+                        camera.lookAt(cameraXPos, 0, 0)
+                        return gl.setClearColor('lightpink')
+                        }}>
                         <Suspense fallback={null}>
                             <Scene></Scene>
                         </Suspense>
