@@ -6,6 +6,7 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "camera-controls": "^1.21.0",
     "glsl-grid": "^1.0.2",
     "glsl-random": "0.0.5",
     "glslify": "^7.0.0",

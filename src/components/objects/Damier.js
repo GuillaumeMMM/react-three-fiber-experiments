@@ -6,7 +6,7 @@ import vertexShader from '../../assets/shaders/basic.vert';
 export function Damier(props) {
     
     const ref = useRef();
-    useFrame(() => {
+    useFrame((event) => {
         ref.current.material.uniforms.uTime.value += 0.01;
         ref.current.material.extensions = {
             derivatives: true
@@ -26,36 +26,40 @@ export function Damier(props) {
     )
 
     let pointerDown = false;
-    let initialDownPosX = null;
-    let initialDownPosY = null;
+    let currentDownPosX = null;
+    let currentDownPosY = null;
 
     const onPointerDown = (e) => {
         pointerDown = true;
-        initialDownPosX = e.pageX;
-        initialDownPosY = e.pageY;
+        currentDownPosX = e.pageX;
+        currentDownPosY = e.pageY;
     }
 
     const onPointerUp = () => {
         pointerDown = false;
-        initialDownPosX = null;
-        initialDownPosY = null;
+        currentDownPosX = null;
+        currentDownPosY = null;
     }
 
     const onPointerMove = (event) => {
         if (pointerDown) {
-            const diffX = initialDownPosX - event.pageX;
-            const diffY = initialDownPosY - event.pageY;
-            initialDownPosX = event.pageX;
-            initialDownPosY = event.pageY;
-            props.camera.position.x += diffX / 30.;
-            props.camera.position.y -= diffY / 100.;
+            const diffX = currentDownPosX - event.pageX;
+            const diffY = currentDownPosY - event.pageY;
+            currentDownPosX = event.pageX;
+            currentDownPosY = event.pageY;
+            props.updateTranslate(diffX/100, diffY/100);
         }
     }
 
     return (
-        <group position={[0, 0, 9]}>
-            <mesh ref={ref} onPointerDown={e => onPointerDown(e)} onPointerUp={e => onPointerUp()} onPointerMove={e => onPointerMove(e)} onPointerOut={e => onPointerUp()}>
-                <planeBufferGeometry attach="geometry" args={[10, 10,  128, 128]}></planeBufferGeometry>
+        <group position={[0, 0, 10]}>
+            <mesh ref={ref} 
+            onPointerDown={e => onPointerDown(e)} 
+            onPointerUp={e => onPointerUp()} 
+            onPointerMove={e => onPointerMove(e)} 
+            onPointerOut={e => onPointerUp()}
+            >
+                <planeBufferGeometry attach="geometry" args={[20, 20,  128, 128]}></planeBufferGeometry>
                 <shaderMaterial attach="material" {...data} />
             </mesh>
         </group>

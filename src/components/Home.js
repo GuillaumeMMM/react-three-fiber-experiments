@@ -1,39 +1,49 @@
-import React, { Component, Suspense } from 'react';
-import { Canvas, useThree, extend, useFrame } from 'react-three-fiber';
+import React, { Suspense } from 'react';
+import { Canvas, useThree, useFrame } from 'react-three-fiber';
 /* import { DefaultThing } from './objects/DefaultObject';
 import { DefaultTextObject } from './objects/DefaultTextObject'; */
 import { Damier } from './objects/Damier';
-import { OrbitControls } from '../assets/orbit';
+import CameraControls from 'camera-controls';
+import * as THREE from 'three';
 
-extend({ OrbitControls })
+CameraControls.install( { THREE: THREE } );
 
-const Scene = () => {
+const Scene = (props) => {
     const {
         camera,
         gl: { domElement }
     } = useThree();
 
+    const clock = new THREE.Clock();
+    const cameraControls = new CameraControls( camera, domElement );
+    cameraControls.enabled = false;
+
+    useFrame((event) => {
+        const delta = clock.getDelta();
+	    cameraControls.update( delta );
+    });
+
+    const updateTranslate = (x, y) => {
+        cameraControls.truck( x, y, true )
+    }
 
     return (
         <>
             <group>
-                <Damier camera={camera}></Damier>
+                <Damier camera={camera} updateTranslate={updateTranslate}></Damier>
             </group>
-            {/* <orbitControls args={[camera, domElement]} /> */}
         </>
     )
 }
 
-class Home extends Component {
+export const Home = () => {
 
-    render() {
-        let cameraXPos = 1;
+        let cameraXPos = 0;
 
         return (
             <div className="home-container">
                 <div className="canvas-container">
-                    <Canvas gl={{ antialias: false, alpha: false }} camera={{ position: [cameraXPos, 0, 15] }} onCreated={({ gl, camera }) => {
-                        console.log(camera)
+                    <Canvas gl={{ antialias: false, alpha: false }} camera={{ position: [cameraXPos, -3, 25] }} onCreated={({ gl, camera }) => {
                         camera.lookAt(cameraXPos, 0, 0)
                         return gl.setClearColor('lightpink')
                         }}>
@@ -44,7 +54,6 @@ class Home extends Component {
                 </div>
             </div>
         );
-    }
 }
 
 export default Home;
