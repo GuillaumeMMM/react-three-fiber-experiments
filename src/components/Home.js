@@ -1,7 +1,5 @@
 import React, { Suspense } from 'react';
 import { Canvas, useThree, useFrame } from 'react-three-fiber';
-/* import { DefaultThing } from './objects/DefaultObject';
-import { DefaultTextObject } from './objects/DefaultTextObject'; */
 import { Damier } from './objects/Damier';
 import CameraControls from 'camera-controls';
 import * as THREE from 'three';
@@ -43,7 +41,7 @@ export const Home = () => {
         return (
             <div className="home-container">
                 <div className="canvas-container">
-                    <Canvas gl={{ antialias: false, alpha: false }} camera={{ position: [cameraXPos, -3, 25] }} onCreated={({ gl, camera }) => {
+                    <Canvas gl={{ antialias: false, alpha: false }} camera={{ position: [cameraXPos, -2, 16] }} onCreated={({ gl, camera }) => {
                         camera.lookAt(cameraXPos, 0, 0)
                         return gl.setClearColor('lightpink')
                         }}>

@@ -7,17 +7,21 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "camera-controls": "^1.21.0",
+    "glsl-aastep": "^1.0.1",
     "glsl-grid": "^1.0.2",
+    "glsl-noise": "0.0.0",
     "glsl-random": "0.0.5",
     "glslify": "^7.0.0",
     "glslify-loader": "^2.0.0",
+    "load-bmfont": "^1.4.0",
     "node-sass": "^4.14.0",
     "raw-loader": "^4.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
     "react-three-fiber": "^4.1.1",
-    "three": "^0.115.0"
+    "three": "^0.115.0",
+    "three-bmfont-text": "^2.3.0"
   },
   "scripts": {
     "start": "webpack-dev-server --open --mode development",
