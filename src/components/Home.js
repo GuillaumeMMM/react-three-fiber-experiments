@@ -1,6 +1,8 @@
 import React, { Suspense } from 'react';
 import { Canvas, useThree, useFrame } from 'react-three-fiber';
 import { Damier } from './objects/Damier';
+import { PlaneTexture } from './experiments/PlaneTexture';
+import { PlaneMouseEffect } from './experiments/PlaneMouseEffect';
 import CameraControls from 'camera-controls';
 import * as THREE from 'three';
 
@@ -29,6 +31,8 @@ const Scene = (props) => {
         <>
             <group>
                 <Damier camera={camera} updateTranslate={updateTranslate}></Damier>
+                {/* <PlaneTexture camera={camera} updateTranslate={updateTranslate}></PlaneTexture> */}
+                {/* <PlaneMouseEffect camera={camera} updateTranslate={updateTranslate}></PlaneMouseEffect> */}
             </group>
         </>
     )
@@ -41,9 +45,9 @@ export const Home = () => {
         return (
             <div className="home-container">
                 <div className="canvas-container">
-                    <Canvas gl={{ antialias: false, alpha: false }} camera={{ position: [cameraXPos, -2, 16] }} onCreated={({ gl, camera }) => {
+                    <Canvas gl={{ antialias: false, alpha: false }} camera={{ position: [cameraXPos, 0, 8] }} onCreated={({ gl, camera }) => {
                         camera.lookAt(cameraXPos, 0, 0)
-                        return gl.setClearColor('lightpink')
+                        return gl.setClearColor('white')
                         }}>
                         <Suspense fallback={null}>
                             <Scene></Scene>

@@ -84,53 +84,45 @@ float simplex3d_fractal(vec3 m) {
 			+0.0666667*simplex3d(8.0*m);
 }
 
-vec4 addAmbiantNoise(vec2 pos, vec4 c, float noiseAmount) {
+vec4 addAmbiantNoise(vec2 pos, vec4 c) {
+	float noiseAmount = 0.2;
     float n = fract(sin(dot(pos, vec2(12.9898, 78.233))) * 
                     43758.5453);
     c.x *= (1.0 - noiseAmount + n * noiseAmount  + n * n * n * noiseAmount / 2.);
     c.y *= (1.0 - noiseAmount + n * noiseAmount  + n * n * n * noiseAmount / 2.);
-    c.z *= (1.0 - noiseAmount + n * noiseAmount);
+    c.z *= (1.0 - noiseAmount + n * noiseAmount  + n * n * n * noiseAmount / 2.);
 	return c;
 }
 
-vec4 ambiant(float dProd){
-    vec3 color=vec3(0.1922, 0.7765, 0.8196);
-    vec3 color1bis=vec3(1.0, 1.0, 1.0);
+void main(){
+    vec3 color=vec3(0.1922, 0.8196, 0.6627);
+    vec3 color1bis=vec3(0.6902, 0.8275, 0.7961);
     vec3 color2=vec3(1.0, 0.4, 0.0);
-    vec3 color2bis=vec3(1.0, 1.0, 1.0);
+    vec3 color2bis=vec3(0.8588, 0.4588, 0.8275);
     vec3 color3=vec3(1.0, 0.0, 0.9176);
-    vec3 color3bis=color;
+    vec3 color3bis=color2bis;
+    vec3 light=vec3(1.0, 0.0, 10.0);
+    light=normalize(light);
+
+    float dProd=dot(vNormal,light)*.5 + 1.;
 
 	vec3 p3 = vec3(Position.xy, uTime * 2.);
     float valueGlobal = simplex3d_fractal(p3/20.);
     float valueInner = simplex3d_fractal(p3/20.);
-    float valueReduced = simplex3d_fractal(p3/10.);
+    float valueReduced = simplex3d_fractal(p3/4.);
 
     float valueSmooth = smoothstep(-1., 1., valueInner);
     float valueStep = smoothstep(-.2, .2, valueGlobal);
-    float valueSmooth2 = smoothstep(-.05, .05, valueReduced);
+    float valueSmooth2 = smoothstep(-1., 1., valueReduced);
 
     vec3 color1F = vec3(color) * vec3(valueSmooth) + vec3(color1bis) * (1. - vec3(valueSmooth));
     vec3 color2F = vec3(color2) * vec3(valueSmooth) + vec3(color2bis) * (1. - vec3(valueSmooth));
     vec3 color3F = vec3(color3bis) * vec3(valueSmooth2);
 
-    float alpha = smoothstep(0., 1. + valueSmooth2 * (1. + sin(uTime) * sin(uTime)), distance(Position.xy, mouse));
-    float alphaMouse = 1. - smoothstep(0., cos(uTime / 10000.) * sin(uTime / 10000.) * 3., distance(Position.xy, mouse));
+    float alpha = smoothstep(0., 4., distance(Position.xy, mouse));
+    float alphaMouse = 1. - smoothstep(0., 4., distance(Position.xy, mouse));
 
-    vec4 ambaintColor = alpha * addAmbiantNoise(Position.xy, vec4((vec3(color1F) * vec3(valueStep) + vec3(color2F) * (1. - vec3(valueStep))) * vec3(dProd), 1.), 0.3) + (1. - alpha) * addAmbiantNoise(Position.xy, vec4(color3F, 0.), 0.1);
+    vec4 ambaintColor = alpha * addAmbiantNoise(Position.xy, vec4((vec3(color1F) * vec3(valueStep) + vec3(color2F) * (1. - vec3(valueStep))) * vec3(dProd), 1.)) + (1.25 - alpha) * addAmbiantNoise(Position.xy, vec4(color3F, length(color3F)));
 
-    return ambaintColor;
-}
-
-void main(){
-    vec3 color=vec3(.9,.9,.9);
-    vec3 light=vec3(0.0, 0.0, 1.0);
-    light=normalize(light);
-
-    float dProd=dot(vNormal,light)*.5 + 1.;
-    
-    float lines=grid(Position,vec3(1.,1.,1.),2.);
-    
-    gl_FragColor = vec4(vec3(lines), length(lines)) + ambiant(dProd);
-	/* gl_FragColor = vec4(vec3(lines), length(lines)); */
+    gl_FragColor = ambaintColor;
 }

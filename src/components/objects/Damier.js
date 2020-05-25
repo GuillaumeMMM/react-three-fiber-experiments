@@ -1,6 +1,8 @@
 import React, { useRef, useEffect } from 'react'
 import { useFrame, useThree } from 'react-three-fiber'
 import planeFragmentShader from '../../assets/shaders/plane.frag';
+import planeBackFragmentShader from '../../assets/shaders/plane_back.frag';
+import planeBackVertexShader from '../../assets/shaders/plane_back.vert';
 import planeVertexShader from '../../assets/shaders/plane.vert';
 import fragmentShader from '../../assets/shaders/plane_text.frag';
 import vertexShader from '../../assets/shaders/plane_text.vert';
@@ -20,6 +22,7 @@ export function Damier(props) {
   const ENABLE_TEXT = true;
 
   const group = useRef();
+  const back = useRef();
   const { scene } = useThree();
   const lines = [];
   var axesHelper = new THREE.AxesHelper(1);
@@ -27,11 +30,16 @@ export function Damier(props) {
   const lettersGeometries = [];
 
   const ref = useRef();
+
   useFrame((event) => {
     ref.current.material.uniforms.uTime.value += 0.01;
+    back.current.material.uniforms.uTime.value += 0.01;
     if (point) {
       ref.current.material.uniforms.mouse.value.x = point.x;
       ref.current.material.uniforms.mouse.value.y = point.y;
+
+      back.current.position.x = point.x;
+      back.current.position.y = point.y;
     }
 
     if (ENABLE_TEXT) {
@@ -72,7 +80,7 @@ export function Damier(props) {
         loader.load('fonts/MS Mincho_Regular.json', (font2) => {
           const texts = [
             { chars: 'Bonjour - Bonjour - Bonjour - Bonjour - Bonjour - Bonjour - ', font: font1 },
-            { chars: '私は日本語を話しません - 私は日本語を話しません - 私は日本語を話しません', font: font2 },
+            { chars: 'おはよう - おはよう - おはよう - おはよう - おはよう - おはよう', font: font2 },
             { chars: 'Hello - Hello - Hello - Hello - Hello - Hello - Hello', font: font1 }];
           let charsFont1 = '';
           let charsFont2 = '';
@@ -111,13 +119,14 @@ export function Damier(props) {
       lineGroup.add(lineGroupBlock2);
       lineGroup.add(lineGroupBlock3);
       group.current.add(lineGroup);
-      var outlineMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff, side: THREE.BackSide });
+      var outlineMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
 
       var material = new THREE.RawShaderMaterial({
         vertexShader: vertexShader,
         fragmentShader: fragmentShader,
         uniforms: {
           /* map: { value: texture }, */
+          mouse: { value: {x: 0, y: 0 } },
           color: { value: new THREE.Color('#000') }
         },
         transparent: true,
@@ -176,6 +185,11 @@ export function Damier(props) {
     vertexShader: planeVertexShader,
   };
 
+  const dataBack = JSON.parse(JSON.stringify(data));
+  dataBack.fragmentShader = planeBackFragmentShader;
+  dataBack.vertexShader = planeBackVertexShader;
+
+
   const mouse = new THREE.Vector2();
   const raycaster = new THREE.Raycaster();
 
@@ -220,7 +234,7 @@ export function Damier(props) {
   } */
 
   return (
-    <group position={[0, 0, 10]}>
+    <group position={[0, 0, 1]}>
       <mesh ref={ref}
         onPointerDown={e => onPointerDown(e)}
         onPointerUp={e => onPointerUp()}
@@ -230,8 +244,12 @@ export function Damier(props) {
         <planeBufferGeometry attach="geometry" args={[50, 30, 128, 128]}></planeBufferGeometry>
         <shaderMaterial attach="material" {...data} />
       </mesh>
-      {/*  <PLaneText point={point}></PLaneText> */}
-      <group ref={group} position={[0, -12, -2]}>
+      <mesh ref={back} position={[0, 0, -0.8]}>
+        <planeBufferGeometry attach="geometry" args={[8, 8, 16, 16]}></planeBufferGeometry>
+        <shaderMaterial attach="material" {...dataBack} />
+      </mesh>
+
+      <group ref={group} position={[0, -12, -0.7]}>
 
       </group>
     </group>

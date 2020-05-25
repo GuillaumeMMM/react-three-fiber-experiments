@@ -78,12 +78,12 @@ vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
 
 void main(){
     vUv = uv;
+    vNormal = normal;
     vec3 pos = position;
     Position = position;
-    float noiseFreq = 0.5;
-    float noiseAmp = .2;
+    float noiseFreq = 0.2;
+    float noiseAmp = 1.;
     vec3 noisePos = vec3(pos.x * noiseFreq + uTime, pos.y * noiseFreq + uTime, pos.z);
-    /* pos.z += smoothstep(10., 0., distance(pos.xy, mouse)) * snoise(noisePos) * noiseAmp + sin(uTime) * 0.01; */
-    pos.z += sin(uTime) * 0.1;
+    pos.z += smoothstep(5., 0., distance(pos.xy, mouse)) * snoise(noisePos) * noiseAmp;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.);
 }

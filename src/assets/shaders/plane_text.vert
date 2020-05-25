@@ -3,6 +3,8 @@ attribute vec2 uv;
 uniform mat4 projectionMatrix;
 uniform mat4 modelViewMatrix;
 varying vec2 vUv;
+varying vec3 vNormal;
+
 
 void main() {
   vUv = uv;
