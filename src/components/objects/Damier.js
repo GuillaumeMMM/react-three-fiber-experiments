@@ -20,6 +20,7 @@ export function Damier(props) {
   const TEXT_INLINE_SIZE = 0.02;
   const LINE_COUNT = 3;
   const ENABLE_TEXT = true;
+  const TEXT_INTER_LINE = 2. * (TEXT_SIZE + 0.15);
 
   const group = useRef();
   const back = useRef();
@@ -49,10 +50,11 @@ export function Damier(props) {
 
         group.current.children.forEach((lineGroupTmp, j) => {
           const elmWidthTmp = lines.find(line => line.id === lineGroupTmp.uuid) ? lines.find(line => line.id === lineGroupTmp.uuid).elmWidth : 0;
-          if (lineGroupTmp.position.x - elmWidthTmp > 10) {
+          const direction = lines.find(line => line.id === lineGroupTmp.uuid) ? lines.find(line => line.id === lineGroupTmp.uuid).direction : -1;
+          if (direction === 1 && lineGroupTmp.position.x + 15 > elmWidthTmp) {
             lineGroupTmp.position.x -= (elmWidthTmp + TEXT_SIZE)
           }
-          if (lineGroupTmp.position.x + elmWidthTmp < -20) {
+          if (direction === -1 && lineGroupTmp.position.x - 15 < -elmWidthTmp) {
             lineGroupTmp.position.x += (elmWidthTmp + TEXT_SIZE)
           }
           if (lines.find(line => line.id === lineGroupTmp.uuid)) {
@@ -61,16 +63,38 @@ export function Damier(props) {
           }
         });
 
-        if (point && (point.y) > lines_bbox.max.y) {
-          group.current.position.y -= lines_bbox.min.y - lines_bbox.max.y;
+        if (point && (point.y) > lines_bbox.max.y - (TEXT_SIZE + 0.3)) {
+          /* group.current.position.y -= (lines_bbox.min.y - lines_bbox.max.y) / LINE_COUNT; */
+          getLowestLine(group.current.children).position.set(group.current.children[0].position.x, getHighestLine(group.current.children).position.y + TEXT_INTER_LINE, group.current.children[0].position.z);
         }
 
-        if (point && (point.y) < lines_bbox.min.y) {
-          group.current.position.y -= lines_bbox.max.y - lines_bbox.min.y;
+        if (point && (point.y) < lines_bbox.min.y + (TEXT_SIZE + 0.3)) {
+          /* group.current.position.y -= (lines_bbox.max.y - lines_bbox.min.y) / LINE_COUNT; */
+          getHighestLine(group.current.children).position.set(group.current.children[0].position.x, getLowestLine(group.current.children).position.y - TEXT_INTER_LINE, group.current.children[0].position.z);
         }
       }
     }
   });
+
+  const getLowestLine = (lines) => {
+    let lowest = lines[0];
+    lines.forEach(line => {
+      if (line.position.y < lowest.position.y) {
+        lowest = line;
+      }
+    });
+    return lowest;
+  }
+
+  const getHighestLine = (lines) => {
+    let highest = lines[0];
+    lines.forEach(line => {
+      if (line.position.y > highest.position.y) {
+        highest = line;
+      }
+    });
+    return highest;
+  }
 
   useEffect(() => {
 
@@ -81,7 +105,7 @@ export function Damier(props) {
           const texts = [
             { chars: 'Bonjour - Bonjour - Bonjour - Bonjour - Bonjour - Bonjour - ', font: font1 },
             { chars: 'おはよう - おはよう - おはよう - おはよう - おはよう - おはよう', font: font2 },
-            { chars: 'Hello - Hello - Hello - Hello - Hello - Hello - Hello', font: font1 }];
+            { chars: 'Hello0 - Hello1 - Hello2 - Hello3 - Hello4 - Hello5 - Hello6 - Hello7 - Hello8 - Hello9', font: font1 }];
           let charsFont1 = '';
           let charsFont2 = '';
           texts.forEach(tx => (tx.font.data.familyName === font1.data.familyName) ? charsFont1 += tx.chars : charsFont2 += tx.chars);
@@ -101,8 +125,8 @@ export function Damier(props) {
 
             for (let i = 0; i < LINE_COUNT; i++) {
               if (texts[i % texts.length].font.data.familyName === charObj.font.data.familyName) {
-                const mouvement = { direction: -1, speed: TEXT_MIN_SPEED + (Math.random() * (TEXT_MAX_SPEED - TEXT_MIN_SPEED)) }
-                drawLine(i * 2. * (TEXT_SIZE + 0.15), mouvement, texts[i % texts.length].chars);
+                const mouvement = { direction: Math.random() > 0.5 ? 1 : -1, speed: TEXT_MIN_SPEED + (Math.random() * (TEXT_MAX_SPEED - TEXT_MIN_SPEED)) }
+                drawLine(0, mouvement, texts[i % texts.length].chars, i);
               }
             }
           })
@@ -110,14 +134,16 @@ export function Damier(props) {
       });
     }
 
-    function drawLine(linePos, mouvement, text) {
+    function drawLine(linePos, mouvement, text, i) {
       const lineGroup = new THREE.Object3D();
+      lineGroup.position.y = i * TEXT_INTER_LINE;
+      lineGroup.position.z = 0;
       const lineGroupBlock1 = new THREE.Object3D();
       const lineGroupBlock2 = new THREE.Object3D();
-      const lineGroupBlock3 = new THREE.Object3D();
+      /* const lineGroupBlock3 = new THREE.Object3D(); */
       lineGroup.add(lineGroupBlock1);
       lineGroup.add(lineGroupBlock2);
-      lineGroup.add(lineGroupBlock3);
+      /* lineGroup.add(lineGroupBlock3); */
       group.current.add(lineGroup);
       var outlineMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
 
@@ -134,7 +160,7 @@ export function Damier(props) {
         depthTest: false
       })
 
-      let currentLeft = 0;
+      let currentLeft = 10;
       for (let i = 0; i < text.length; i++) {
         if (text[i] === ' ') {
           currentLeft += 0.5
@@ -143,20 +169,20 @@ export function Damier(props) {
           let mesh1Back = new THREE.Mesh(lettersGeometries.find(geo => geo.char === text[i])?.geometryBack, outlineMaterial);
           let mesh2 = new THREE.Mesh(lettersGeometries.find(geo => geo.char === text[i])?.geometry, material);
           let mesh2Back = new THREE.Mesh(lettersGeometries.find(geo => geo.char === text[i])?.geometryBack, outlineMaterial);
-          let mesh3 = new THREE.Mesh(lettersGeometries.find(geo => geo.char === text[i])?.geometry, material);
-          let mesh3Back = new THREE.Mesh(lettersGeometries.find(geo => geo.char === text[i])?.geometryBack, outlineMaterial);
+          /* let mesh3 = new THREE.Mesh(lettersGeometries.find(geo => geo.char === text[i])?.geometry, material);
+          let mesh3Back = new THREE.Mesh(lettersGeometries.find(geo => geo.char === text[i])?.geometryBack, outlineMaterial); */
           mesh1.position.set(currentLeft, linePos, 0);
           mesh1Back.position.set(currentLeft, linePos, 0);
           mesh2.position.set(currentLeft, linePos, 0);
           mesh2Back.position.set(currentLeft, linePos, 0);
-          mesh3.position.set(currentLeft, linePos, 0);
-          mesh3Back.position.set(currentLeft, linePos, 0);
+          /* mesh3.position.set(currentLeft, linePos, 0);
+          mesh3Back.position.set(currentLeft, linePos, 0); */
           lineGroup.children[0].add(mesh1);
           lineGroup.children[0].add(mesh1Back);
           lineGroup.children[1].add(mesh2);
           lineGroup.children[1].add(mesh2Back);
-          lineGroup.children[2].add(mesh3);
-          lineGroup.children[2].add(mesh3Back);
+          /* lineGroup.children[2].add(mesh3);
+          lineGroup.children[2].add(mesh3Back); */
           var cube_bbox = new THREE.Box3();
           cube_bbox.setFromObject(mesh1);
           currentLeft += getBoxWidth(cube_bbox) + 0.1;
@@ -165,7 +191,7 @@ export function Damier(props) {
       const line_bbox = new THREE.Box3();
       line_bbox.setFromObject(lineGroup);
       lineGroup.children[0].position.set(- getBoxWidth(line_bbox) - TEXT_SIZE, 0, 0);
-      lineGroup.children[2].position.set(getBoxWidth(line_bbox) + TEXT_SIZE, 0, 0);
+      /* lineGroup.children[2].position.set(getBoxWidth(line_bbox) + TEXT_SIZE, 0, 0); */
       lines.push({ id: lineGroup.uuid, direction: mouvement.direction, speed: mouvement.speed, elmWidth: getBoxWidth(line_bbox) });
     }
 
@@ -234,7 +260,7 @@ export function Damier(props) {
   } */
 
   return (
-    <group position={[0, 0, 1]}>
+    <group position={[0, 0, 0]}>
       <mesh ref={ref}
         onPointerDown={e => onPointerDown(e)}
         onPointerUp={e => onPointerUp()}
@@ -244,12 +270,12 @@ export function Damier(props) {
         <planeBufferGeometry attach="geometry" args={[50, 30, 128, 128]}></planeBufferGeometry>
         <shaderMaterial attach="material" {...data} />
       </mesh>
-      <mesh ref={back} position={[0, 0, -0.8]}>
-        <planeBufferGeometry attach="geometry" args={[8, 8, 16, 16]}></planeBufferGeometry>
+      <mesh ref={back} position={[0, 0, -1.8]}>
+        <planeBufferGeometry attach="geometry" args={[10, 10, 16, 16]}></planeBufferGeometry>
         <shaderMaterial attach="material" {...dataBack} />
       </mesh>
 
-      <group ref={group} position={[0, -12, -0.7]}>
+      <group ref={group} position={[0, 0, -1.7]}>
 
       </group>
     </group>

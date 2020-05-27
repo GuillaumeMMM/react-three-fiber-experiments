@@ -24,7 +24,9 @@ const Scene = (props) => {
     });
 
     const updateTranslate = (x, y) => {
-        cameraControls.truck( x, y, true )
+        cameraControls.truck( x, y, true );
+        let position = cameraControls.getPosition();
+        cameraControls.setPosition(position.x, position.y, position.z + y / 8, true)
     }
 
     return (
@@ -45,8 +47,8 @@ export const Home = () => {
         return (
             <div className="home-container">
                 <div className="canvas-container">
-                    <Canvas gl={{ antialias: false, alpha: false }} camera={{ position: [cameraXPos, 0, 8] }} onCreated={({ gl, camera }) => {
-                        camera.lookAt(cameraXPos, 0, 0)
+                    <Canvas gl={{ antialias: false, alpha: false }} camera={{ position: [cameraXPos, -1, 8] }} onCreated={({ gl, camera }) => {
+                        /* camera.lookAt(cameraXPos, 0, 0) */
                         return gl.setClearColor('white')
                         }}>
                         <Suspense fallback={null}>

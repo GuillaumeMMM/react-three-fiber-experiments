@@ -120,6 +120,7 @@ vec4 ambiant(float dProd){
     vec4 ambaintColor = alpha * addAmbiantNoise(Position.xy, vec4((vec3(color1F) * vec3(valueStep) + vec3(color2F) * (1. - vec3(valueStep))) * vec3(dProd), 1.), 0.3) + (1. - alpha) * addAmbiantNoise(Position.xy, vec4(color3F, 0.), 0.1);
 
     return ambaintColor;
+	/* return vec4(0., 0., 0., 1.); */
 }
 
 void main(){
