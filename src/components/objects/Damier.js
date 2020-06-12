@@ -157,7 +157,7 @@ export function Damier(props) {
         },
         transparent: true,
         side: THREE.DoubleSide,
-        depthTest: false
+        /* depthTest: false */
       })
 
       let currentLeft = 10;
@@ -171,9 +171,9 @@ export function Damier(props) {
           let mesh2Back = new THREE.Mesh(lettersGeometries.find(geo => geo.char === text[i])?.geometryBack, outlineMaterial);
           /* let mesh3 = new THREE.Mesh(lettersGeometries.find(geo => geo.char === text[i])?.geometry, material);
           let mesh3Back = new THREE.Mesh(lettersGeometries.find(geo => geo.char === text[i])?.geometryBack, outlineMaterial); */
-          mesh1.position.set(currentLeft, linePos, 0);
+          mesh1.position.set(currentLeft, linePos, 0.01);
           mesh1Back.position.set(currentLeft, linePos, 0);
-          mesh2.position.set(currentLeft, linePos, 0);
+          mesh2.position.set(currentLeft, linePos, 0.01);
           mesh2Back.position.set(currentLeft, linePos, 0);
           /* mesh3.position.set(currentLeft, linePos, 0);
           mesh3Back.position.set(currentLeft, linePos, 0); */
@@ -198,13 +198,12 @@ export function Damier(props) {
     const getBoxWidth = (bbox) => {
       return (bbox.max.x - bbox.min.x);
     }
-  }, []);
+  });
 
   const data = {
     uniforms: {
       uTime: { value: 0 },
       mouse: { value: {x: 0, y: 0 } },
-      lights: true,
     },
     transparent: true,
     fragmentShader: planeFragmentShader,
@@ -267,15 +266,15 @@ export function Damier(props) {
         onPointerMove={e => onPointerMove(e)}
         onPointerOut={e => onPointerUp()}
       >
-        <planeBufferGeometry attach="geometry" args={[50, 30, 128, 128]}></planeBufferGeometry>
+        <planeBufferGeometry attach="geometry" args={[50, 30, 8, 8]}></planeBufferGeometry>
         <shaderMaterial attach="material" {...data} />
       </mesh>
-      <mesh ref={back} position={[0, 0, -1.8]}>
-        <planeBufferGeometry attach="geometry" args={[10, 10, 16, 16]}></planeBufferGeometry>
+      <mesh ref={back} position={[0, 0, -5]}>
+        <planeBufferGeometry attach="geometry" args={[10, 10, 8, 8]}></planeBufferGeometry>
         <shaderMaterial attach="material" {...dataBack} />
       </mesh>
 
-      <group ref={group} position={[0, 0, -1.7]}>
+      <group ref={group} position={[0, 0, -4.9]}>
 
       </group>
     </group>
