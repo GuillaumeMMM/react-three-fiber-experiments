@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { useFrame, useThree } from 'react-three-fiber'
 import planeFragmentShader from '../../assets/shaders/plane.frag';
 import planeBackFragmentShader from '../../assets/shaders/plane_back.frag';
@@ -11,9 +11,24 @@ import * as THREE from 'three';
 
 export function Damier(props) {
 
-  let point = null;
+  const [point, updatePoint] = useState(null);
 
-  const TEXT_SIZE = 0.9;
+  const [data] = useState({
+    uniforms: {
+      uTime: { value: 0 },
+      mouse: { value: {x: 0, y: 0 } },
+      uShadowPosition1: { value: {x: props.positions[0][0], y: props.positions[0][1]} },
+      uShadowPosition2: { value: {x: props.positions[1][0], y: props.positions[1][1]} },
+      uShadowPosition3: { value: {x: props.positions[2][0], y: props.positions[2][1]} },
+      uShadowPosition4: { value: {x: props.positions[3][0], y: props.positions[3][1]} },
+      uShadowPosition5: { value: {x: props.positions[4][0], y: props.positions[4][1]} },
+    },
+    transparent: true,
+    fragmentShader: planeFragmentShader,
+    vertexShader: planeVertexShader,
+  });
+
+  const TEXT_SIZE = 1.5;
   const TEXT_MIN_SPEED = 0.02;
   const TEXT_MAX_SPEED = 0.05;
   const TEXT_OUTLINE_SIZE = 0.1;
@@ -21,56 +36,64 @@ export function Damier(props) {
   const LINE_COUNT = 3;
   const ENABLE_TEXT = true;
   const TEXT_INTER_LINE = 2. * (TEXT_SIZE + 0.15);
+  const PLANE_DIM = {width: 40, height: 30};
 
   const group = useRef();
   const back = useRef();
-  const { scene } = useThree();
-  const lines = [];
-  var axesHelper = new THREE.AxesHelper(1);
-  scene.add(axesHelper)
-  const lettersGeometries = [];
+/*   const { scene } = useThree(); */
+  const [lines] = useState([]);
+  const [raycaster, updateRaycaster] = useState(new THREE.Raycaster());
+  const [mouse, updateMouse] = useState(new THREE.Vector2());
+  const [pointerDown, updatePointerDown] = useState(false);
+  const [currentDownPosX, updateCurrentDownPosX] = useState(null);
+  const [currentDownPosY, updateCurrentDownPosY] = useState(null);
+/*   var axesHelper = new THREE.AxesHelper(1);
+  scene.add(axesHelper) */
 
   const ref = useRef();
 
   useFrame((event) => {
     ref.current.material.uniforms.uTime.value += 0.01;
-    back.current.material.uniforms.uTime.value += 0.01;
-    if (point) {
-      ref.current.material.uniforms.mouse.value.x = point.x;
-      ref.current.material.uniforms.mouse.value.y = point.y;
+      back.current.material.uniforms.uTime.value += 0.01;
+      if (point) {
+        ref.current.material.uniforms.mouse.value.x = point.x;
+        ref.current.material.uniforms.mouse.value.y = point.y;
+  
+        back.current.position.x = point.x;
+        back.current.position.y = point.y;
+      }
 
-      back.current.position.x = point.x;
-      back.current.position.y = point.y;
-    }
-
-    if (ENABLE_TEXT) {
-      if (group.current.children && group.current.children[0] && group.current.children[0].children && group.current.children[0].children.length > 0) {
-        const lines_bbox = new THREE.Box3();
-        lines_bbox.setFromObject(group.current);
-
-        group.current.children.forEach((lineGroupTmp, j) => {
-          const elmWidthTmp = lines.find(line => line.id === lineGroupTmp.uuid) ? lines.find(line => line.id === lineGroupTmp.uuid).elmWidth : 0;
-          const direction = lines.find(line => line.id === lineGroupTmp.uuid) ? lines.find(line => line.id === lineGroupTmp.uuid).direction : -1;
-          if (direction === 1 && lineGroupTmp.position.x + 15 > elmWidthTmp) {
-            lineGroupTmp.position.x -= (elmWidthTmp + TEXT_SIZE)
+    if (!props.planeFrontOpened) {
+  
+      if (ENABLE_TEXT) {
+        if (group.current.children && group.current.children[0] && group.current.children[0].children && group.current.children[0].children.length > 0) {
+          const lines_bbox = new THREE.Box3();
+          lines_bbox.setFromObject(group.current);
+  
+          group.current.children.forEach((lineGroupTmp, j) => {
+            const elmWidthTmp = lines.find(line => line.id === lineGroupTmp.uuid) ? lines.find(line => line.id === lineGroupTmp.uuid).elmWidth : 0;
+            const direction = lines.find(line => line.id === lineGroupTmp.uuid) ? lines.find(line => line.id === lineGroupTmp.uuid).direction : -1;
+            if (direction === 1 && lineGroupTmp.position.x + 15 > elmWidthTmp) {
+              lineGroupTmp.position.x -= (elmWidthTmp + TEXT_SIZE)
+            }
+            if (direction === -1 && lineGroupTmp.position.x - 15 < -elmWidthTmp) {
+              lineGroupTmp.position.x += (elmWidthTmp + TEXT_SIZE)
+            }
+            if (lines.find(line => line.id === lineGroupTmp.uuid)) {
+              const line = lines.find(line => line.id === lineGroupTmp.uuid);
+              group.current.children[j].position.x += line.direction * line.speed;
+            }
+          });
+  
+          if (point && (point.y) > lines_bbox.max.y - (TEXT_SIZE + 0.3)) {
+            /* group.current.position.y -= (lines_bbox.min.y - lines_bbox.max.y) / LINE_COUNT; */
+            getLowestLine(group.current.children).position.set(group.current.children[0].position.x, getHighestLine(group.current.children).position.y + TEXT_INTER_LINE, group.current.children[0].position.z);
           }
-          if (direction === -1 && lineGroupTmp.position.x - 15 < -elmWidthTmp) {
-            lineGroupTmp.position.x += (elmWidthTmp + TEXT_SIZE)
+  
+          if (point && (point.y) < lines_bbox.min.y + (TEXT_SIZE + 0.3)) {
+            /* group.current.position.y -= (lines_bbox.max.y - lines_bbox.min.y) / LINE_COUNT; */
+            getHighestLine(group.current.children).position.set(group.current.children[0].position.x, getLowestLine(group.current.children).position.y - TEXT_INTER_LINE, group.current.children[0].position.z);
           }
-          if (lines.find(line => line.id === lineGroupTmp.uuid)) {
-            const line = lines.find(line => line.id === lineGroupTmp.uuid);
-            group.current.children[j].position.x += line.direction * line.speed;
-          }
-        });
-
-        if (point && (point.y) > lines_bbox.max.y - (TEXT_SIZE + 0.3)) {
-          /* group.current.position.y -= (lines_bbox.min.y - lines_bbox.max.y) / LINE_COUNT; */
-          getLowestLine(group.current.children).position.set(group.current.children[0].position.x, getHighestLine(group.current.children).position.y + TEXT_INTER_LINE, group.current.children[0].position.z);
-        }
-
-        if (point && (point.y) < lines_bbox.min.y + (TEXT_SIZE + 0.3)) {
-          /* group.current.position.y -= (lines_bbox.max.y - lines_bbox.min.y) / LINE_COUNT; */
-          getHighestLine(group.current.children).position.set(group.current.children[0].position.x, getLowestLine(group.current.children).position.y - TEXT_INTER_LINE, group.current.children[0].position.z);
         }
       }
     }
@@ -97,6 +120,9 @@ export function Damier(props) {
   }
 
   useEffect(() => {
+
+    console.log('useEffect')
+    const lettersGeometries = [];
 
     if (ENABLE_TEXT) {
       var loader = new THREE.FontLoader();
@@ -198,59 +224,42 @@ export function Damier(props) {
     const getBoxWidth = (bbox) => {
       return (bbox.max.x - bbox.min.x);
     }
-  });
-
-  const data = {
-    uniforms: {
-      uTime: { value: 0 },
-      mouse: { value: {x: 0, y: 0 } },
-    },
-    transparent: true,
-    fragmentShader: planeFragmentShader,
-    vertexShader: planeVertexShader,
-  };
+  }, []);
 
   const dataBack = JSON.parse(JSON.stringify(data));
   dataBack.fragmentShader = planeBackFragmentShader;
   dataBack.vertexShader = planeBackVertexShader;
 
-
-  const mouse = new THREE.Vector2();
-  const raycaster = new THREE.Raycaster();
-
-  let pointerDown = false;
-  let currentDownPosX = null;
-  let currentDownPosY = null;
-
   const onPointerDown = (e) => {
-    pointerDown = true;
-    currentDownPosX = e.pageX;
-    currentDownPosY = e.pageY;
+    updatePointerDown(true);
+    updateCurrentDownPosX(e.pageX);
+    updateCurrentDownPosY(e.pageY);
   }
 
   const onPointerUp = () => {
-    pointerDown = false;
-    currentDownPosX = null;
-    currentDownPosY = null;
+    updatePointerDown(false);
+    updateCurrentDownPosX(null);
+    updateCurrentDownPosY(null);
   }
 
   const onPointerMove = (event) => {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-    raycaster.setFromCamera(mouse, props.camera);
-    var objects = raycaster.intersectObjects(ref.current.parent.children);
-    if (!point) {
-      point = objects[0].point;
-    } else {
-      point = objects[0].point;
-    }
+    if (!props.planeFrontOpened) {
+      const newMouse = mouse.clone();
+      newMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      newMouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+      updateMouse(newMouse);
+      raycaster.setFromCamera(newMouse, props.camera);
+      updateRaycaster(raycaster)
+      var objects = raycaster.intersectObjects(ref.current.parent.children);
+      updatePoint(objects[0].point);
 
-    if (pointerDown) {
-      const diffX = currentDownPosX - event.pageX;
-      const diffY = currentDownPosY - event.pageY;
-      currentDownPosX = event.pageX;
-      currentDownPosY = event.pageY;
-      props.updateTranslate(diffX / 50, diffY / 50);
+      if (pointerDown) {
+        const diffX = currentDownPosX - event.pageX;
+        const diffY = currentDownPosY - event.pageY;
+        updateCurrentDownPosX(event.pageX);
+        updateCurrentDownPosY(event.pageY);
+        props.updateTranslate(diffX / 50, diffY / 50);
+      }
     }
   }
 
@@ -266,11 +275,11 @@ export function Damier(props) {
         onPointerMove={e => onPointerMove(e)}
         onPointerOut={e => onPointerUp()}
       >
-        <planeBufferGeometry attach="geometry" args={[50, 30, 8, 8]}></planeBufferGeometry>
+        <planeBufferGeometry attach="geometry" args={[PLANE_DIM.width, PLANE_DIM.height, 8, 8]}></planeBufferGeometry>
         <shaderMaterial attach="material" {...data} />
       </mesh>
       <mesh ref={back} position={[0, 0, -5]}>
-        <planeBufferGeometry attach="geometry" args={[10, 10, 8, 8]}></planeBufferGeometry>
+        <planeBufferGeometry attach="geometry" args={[12, 12, 8, 8]}></planeBufferGeometry>
         <shaderMaterial attach="material" {...dataBack} />
       </mesh>
 

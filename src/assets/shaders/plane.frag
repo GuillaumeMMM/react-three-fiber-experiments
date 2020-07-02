@@ -6,6 +6,11 @@ varying vec2 vUv;
 varying vec3 vNormal;
 uniform float uTime;
 uniform vec2 mouse;
+uniform vec2 uShadowPosition1;
+uniform vec2 uShadowPosition2;
+uniform vec2 uShadowPosition3;
+uniform vec2 uShadowPosition4;
+uniform vec2 uShadowPosition5;
 varying vec3 Position;
 
 /* discontinuous pseudorandom uniformly distributed in [-0.5, +0.5]^3 */
@@ -117,7 +122,7 @@ vec4 ambiant(float dProd){
     float alpha = smoothstep(0., 1. + valueSmooth2 * (1. + sin(uTime) * sin(uTime)), distance(Position.xy, mouse));
     float alphaMouse = 1. - smoothstep(0., cos(uTime / 10000.) * sin(uTime / 10000.) * 3., distance(Position.xy, mouse));
 
-    vec4 ambaintColor = alpha * addAmbiantNoise(Position.xy, vec4((vec3(color1F) * vec3(valueStep) + vec3(color2F) * (1. - vec3(valueStep))) * vec3(dProd), 1.), 0.3) + (1. - alpha) * addAmbiantNoise(Position.xy, vec4(color3F, 0.), 0.1);
+    vec4 ambaintColor = alpha * addAmbiantNoise(Position.xy, vec4((vec3(color1F) * vec3(valueStep) + vec3(color2F) * (1. - vec3(valueStep))) * vec3(dProd), 1.), 0.3) + (1. - alpha) *  addAmbiantNoise(Position.xy, vec4(color3F, 0.), 0.1);
 
     return ambaintColor;
 	/* return vec4(0., 0., 0., 1.); */
@@ -133,10 +138,14 @@ void main(){
     
     float lines=grid(Position,vec3(1.,1.,1.),2.);
 
-	vec2 shadowPos = vec2(-3.1, -0.9);
-	float shadows = smoothstep(-.5, 1.5, distance(shadowPos, Position.xy));
+	float shadows = smoothstep(-.5, 1.5, distance(uShadowPosition1, Position.xy)) * smoothstep(-.5, 1.5, distance(uShadowPosition2, Position.xy)) * smoothstep(-.5, 1.5, distance(uShadowPosition3, Position.xy))  * smoothstep(-.5, 1.5, distance(uShadowPosition4, Position.xy))  * smoothstep(-.5, 1.5, distance(uShadowPosition5, Position.xy));
     
    /*  gl_FragColor = vec4(vec3(lines), length(lines)) + ambiant(dProd); */
    vec4 ambiantWithShadows = (ambiant(dProd) * shadows + (1. - shadows) * vec4(shadowColor, 1.));
-	gl_FragColor = vec4(vec3(lines), length(lines)) + ambiantWithShadows;
+
+	vec4 withLines = vec4(vec3(lines), length(lines)) + ambiantWithShadows;
+
+	/* gl_FragColor = withLines; */
+	vec3 square = vec3(smoothstep(17., 19., distance(0., Position.x)) + smoothstep(12., 14., distance(0., Position.y)));
+	gl_FragColor = withLines * vec4(1. - square, 1.) + vec4(1.0, 1.0, 1.0, 1.0) * vec4(square, 0.);
 }

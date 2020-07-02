@@ -7,6 +7,7 @@ varying vec3 vNormal;
 uniform float uTime;
 uniform float uMouseOver;
 uniform float uTimeOnOver;
+uniform float uText;
 varying vec3 Position;
 
 /* discontinuous pseudorandom uniformly distributed in [-0.5, +0.5]^3 */
@@ -95,15 +96,15 @@ vec3 addAmbiantNoise(vec2 pos, vec3 c, float noiseAmount) {
 }
 
 vec3 ambiant(){
-    vec3 color=vec3(0.4353, 0.0, 1.0);
-    vec3 color1bis=vec3(0.0, 0.6824, 1.0);
+    vec3 color=vec3(0.3333, 0.3333, 0.3333);
+    vec3 color1bis=vec3(1.0, 1.0, 1.0);
 
 	vec3 p3 = vec3(Position.xy, uTime / 15.);
-    float valueReduced = simplex3d_fractal(p3 /3. );
+    float valueReduced = simplex3d_fractal(p3 / 3.);
 
-    float valueSmooth2 = smoothstep(-.5, .5, valueReduced);
+    float valueSmooth2 = smoothstep(-.1, .1, valueReduced);
 
-    vec3 color1F = addAmbiantNoise(Position.xy, color, .4) * vec3(valueSmooth2) + addAmbiantNoise(Position.xy, color1bis, .4) * (1. - vec3(valueSmooth2));
+    vec3 color1F = addAmbiantNoise(Position.xy, color, .5) * vec3(valueSmooth2) + addAmbiantNoise(Position.xy, color1bis, .5) * (1. - vec3(valueSmooth2));
 
     vec3 ambaintColor = color1F;
 
@@ -112,17 +113,19 @@ vec3 ambiant(){
 
 void main(){
     vec3 color=vec3(0.5725, 0.5725, 0.5725);
-    vec3 color2 = vec3(0.6588, 0.8588, 0.8314);
+    vec3 color2 = vec3(0.4824, 0.9451, 0.8863);
 
     vec3 light=vec3(100.0, 100.0, 100.0);
     light=normalize(light);
 
     float dProd=dot(vNormal,light)/5. + 0.7;
 	
-    float invasion = min(( - (Position.y - .6) * exp(uTimeOnOver) / 10.), 1.);
+    float invasion = min(( - (Position.y - .8) * exp(uTimeOnOver) / 10.), 1.);
 
     vec3 animatedNoise = color2;
 
-	gl_FragColor = vec4(addAmbiantNoise(vUv, dProd * color, .5) * (1. - invasion) + (dProd * ambiant()) * invasion, 1.);
+	
+
+	gl_FragColor = (1. - uMouseOver * uText) * vec4(addAmbiantNoise(vUv, dProd * color, .5) * (1. - invasion) + (dProd * ambiant()) * invasion, 1.) + uMouseOver * uText * vec4(1., 1., 1., 1.);
     /* gl_FragColor = vec4(dProd * ambiant(), 1.); */
 }
