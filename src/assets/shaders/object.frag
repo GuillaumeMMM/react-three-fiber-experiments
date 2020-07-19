@@ -96,19 +96,19 @@ vec3 addAmbiantNoise(vec2 pos, vec3 c, float noiseAmount) {
 }
 
 vec3 ambiant(){
-    vec3 color=vec3(0.3333, 0.3333, 0.3333);
+    vec3 color=vec3(0.9686, 0.7882, 0.6706);
     vec3 color1bis=vec3(1.0, 1.0, 1.0);
 
 	vec3 p3 = vec3(Position.xy, uTime / 15.);
-    float valueReduced = simplex3d_fractal(p3 / 3.);
+    float valueReduced = simplex3d_fractal(p3 / 4.);
 
     float valueSmooth2 = smoothstep(-.1, .1, valueReduced);
 
-    vec3 color1F = addAmbiantNoise(Position.xy, color, .5) * vec3(valueSmooth2) + addAmbiantNoise(Position.xy, color1bis, .5) * (1. - vec3(valueSmooth2));
+    vec3 color1F = addAmbiantNoise(Position.xy, color, .2) * vec3(valueSmooth2) + addAmbiantNoise(Position.xy, color1bis, .2) * (1. - vec3(valueSmooth2));
 
     vec3 ambaintColor = color1F;
 
-    return ambaintColor + 0.05;
+    return ambaintColor + 0.2;
 }
 
 void main(){

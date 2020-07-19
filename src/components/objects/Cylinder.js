@@ -18,7 +18,7 @@ export const Cylinder = function (props) {
   let time = 100000;
   const [data, updateData] = useState({
     uniforms: {
-      uTime: { value: 0 },
+      uTime: { value: Math.random() * 100000 },
       uMouseOver: { value: 0 },
       uTimeOnOver: { value: 0 },
       uText: { value: 0 },
@@ -30,58 +30,60 @@ export const Cylinder = function (props) {
 
   useFrame(() => {
     /* cylinder.current.rotation.x += 0.1; */
-    cylinder.current.material.uniforms.uTime.value += 0.1;
-    if (mouseOver && cylinder.current.position.z < initialZPoisiton + 0.5) {
-      cylinder.current.position.z += 0.1;
-    }
-    time += 0.05;
-    if (!mouseOver && cylinder.current.position.z > initialZPoisiton) {
-      cylinder.current.position.z -= 0.1;
-
-      if (lastTextPos.length > 0) {
-        updateLastTextPos([])
+    if (!props.planeFrontOpened) {
+      cylinder.current.material.uniforms.uTime.value += 0.1;
+      if (mouseOver && cylinder.current.position.z < initialZPoisiton + 0.5) {
+        cylinder.current.position.z += 0.1;
       }
-    }
-
-    if (mouseOver) {
-      cylinder.current.material.uniforms.uMouseOver.value = 1;
-      cylinder.current.material.uniforms.uTimeOnOver.value += 0.1;
-
-      if (cylinder.current.children[2]) {
-        cylinder.current.children[2].children.forEach((text, i) => {
-          if (text) {
-            text.children[0].material.uniforms.uMouseOver.value = 1;
-          }
-        });
-      }
-
-      if (lastTextPos.length === 0 && cylinder.current.children[2]) {
-        cylinder.current.children[2].children.forEach((text, i) => {
-          const newLastTextPos = lastTextPos.concat([]);
-          newLastTextPos.push(text.position);
-          updateLastTextPos(newLastTextPos);
-        });
-      }
-    } else {
-      cylinder.current.material.uniforms.uMouseOver.value = 0;
-      cylinder.current.material.uniforms.uTimeOnOver.value = 0;
-      if (cylinder.current.children[2]) {
-        cylinder.current.children[2].children.forEach((text, i) => {
-          if (text) {
-            text.children[0].material.uniforms.uMouseOver.value = 0;
-          }
-        });
-      }
-    }
-
-    if (cylinder.current && cylinder.current.children && cylinder.current.children.length > 0 && cylinder.current.children[2]) {
-      cylinder.current.children[2].children.forEach((text, i) => {
-        if (lastTextPos.length === 0) {
-          text.position.set(10 * 0.5 * TEXT_SIZE * Math.cos(time * randomTextSpeed[i] / 20), -0.5 + (i / 10) + Math.sin(time * randomTextSpeed[i] / 20), 10 * 0.5 * TEXT_SIZE * Math.sin(time * randomTextSpeed[i] / 20))
-        } else {
-          text.position.set(1 + (i * TEXT_SIZE / 1.3), -0.5, TEXT_SIZE / 2)
+      time += 0.05;
+      if (!mouseOver && cylinder.current.position.z > initialZPoisiton) {
+        cylinder.current.position.z -= 0.1;
+  
+        if (lastTextPos.length > 0) {
+          updateLastTextPos([])
         }
-      })
+      }
+  
+      if (mouseOver) {
+        cylinder.current.material.uniforms.uMouseOver.value = 1;
+        cylinder.current.material.uniforms.uTimeOnOver.value += 0.1;
+  
+        if (cylinder.current.children[2]) {
+          cylinder.current.children[2].children.forEach((text, i) => {
+            if (text) {
+              text.children[0].material.uniforms.uMouseOver.value = 1;
+            }
+          });
+        }
+  
+        if (lastTextPos.length === 0 && cylinder.current.children[2]) {
+          cylinder.current.children[2].children.forEach((text, i) => {
+            const newLastTextPos = lastTextPos.concat([]);
+            newLastTextPos.push(text.position);
+            updateLastTextPos(newLastTextPos);
+          });
+        }
+      } else {
+        cylinder.current.material.uniforms.uMouseOver.value = 0;
+        cylinder.current.material.uniforms.uTimeOnOver.value = 0;
+        if (cylinder.current.children[2]) {
+          cylinder.current.children[2].children.forEach((text, i) => {
+            if (text) {
+              text.children[0].material.uniforms.uMouseOver.value = 0;
+            }
+          });
+        }
+      }
+  
+      if (cylinder.current && cylinder.current.children && cylinder.current.children.length > 0 && cylinder.current.children[2]) {
+        cylinder.current.children[2].children.forEach((text, i) => {
+          if (lastTextPos.length === 0) {
+            text.position.set(10 * 0.5 * TEXT_SIZE * Math.cos(time * randomTextSpeed[i] / 20), -0.5 + (i / 10) + Math.sin(time * randomTextSpeed[i] / 20), 10 * 0.5 * TEXT_SIZE * Math.sin(time * randomTextSpeed[i] / 20))
+          } else {
+            text.position.set(1 + (i * TEXT_SIZE / 1.3), -0.5, TEXT_SIZE / 2)
+          }
+        })
+      }
     }
   });
 
