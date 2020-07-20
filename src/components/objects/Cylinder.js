@@ -17,7 +17,7 @@ export const Cylinder = function (props) {
   const [randomTextSpeed, updateRandomTextSpeed] = useState([]);
   const [mouseOver, updateMouseover] = useState(false);
   let time = 100000;
-  const [data, updateData] = useState({
+  const [data] = useState({
     uniforms: {
       uTime: { value: Math.random() * 100000 },
       uMouseOver: { value: 0 },

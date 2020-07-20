@@ -96,6 +96,30 @@ vec4 addAmbiantNoise(vec2 pos, vec4 c, float noiseAmount) {
 	return c;
 }
 
+
+vec4 ambiant2(float dProd){
+	vec3 color=vec3(0.1922, 0.7765, 0.8196);
+    vec3 color1bis=vec3(1.0, 1.0, 1.0);
+    vec3 color2=vec3(1.0, 0.4, 0.0);
+    vec3 color2bis=vec3(1.0, 1.0, 1.0);
+    vec3 color3=vec3(1.0, 0.0, 0.9176);
+    vec3 color3bis=color;
+
+	vec3 p3 = vec3(Position.xy, uTime / 30.);
+    float valueGlobal = simplex3d_fractal(p3 * 2.);
+    float valueInner = simplex3d_fractal(p3 * 2.);
+
+    float valueSmooth = smoothstep(-1., 1., valueInner);
+    float valueStep = smoothstep(-.2, .2, valueGlobal);
+
+    vec3 color1F = vec3(color) * vec3(valueSmooth) + vec3(color1bis) * (1. - vec3(valueSmooth));
+    vec3 color2F = vec3(color3) * vec3(valueSmooth) + vec3(color3bis) * (1. - vec3(valueSmooth));
+
+    vec4 ambaintColor = addAmbiantNoise(Position.xy, vec4((vec3(color1F) * vec3(valueStep) + vec3(color2F) * (1. - vec3(valueStep))) * vec3(dProd), 1.), 0.3);
+
+    return ambaintColor;
+}
+
 vec4 ambiant(vec3 color){
 	float time = 0.;
 	if (uOpeningStartTime > 0.) {
@@ -107,16 +131,15 @@ vec4 ambiant(vec3 color){
 	}
 	vec3 p3 = vec3(Position.xy, time / 10.);
     float valueGlobal = simplex3d_fractal(p3*2. + sin(uTime / 20.));
-
     float valueStep = smoothstep(-0.3, 0.3, valueGlobal + ((time * 1.2) - .5));
-
-    vec4 ambaintColor = vec4(vec3(color * valueStep) + 0.5, valueStep);
+    vec4 ambaintColor = vec4(vec3(ambiant2(1.).xyz * valueStep), valueStep);
 	
-    return ambaintColor * (1. - uOpened) + vec4(color, 1.) * uOpened;
+    return ambaintColor * (1. - uOpened) + ambiant2(1.) * uOpened;
 }
+
 
 void main() {
   vec3 newColor = vec3(1., 1., 1.);
-  vec4 ambiantColor = ambiant(newColor);
+  vec4 ambiantColor = ambiant(newColor) + 0.1;
   gl_FragColor = vec4(ambiantColor.rgb, ambiantColor.a);
 }

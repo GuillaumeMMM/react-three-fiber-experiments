@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { useFrame, useThree } from 'react-three-fiber'
+import { useFrame } from 'react-three-fiber'
 import planeFragmentShader from '../../assets/shaders/plane.frag';
 import emptyFragShader from '../../assets/shaders/empty.frag';
 import planeBackFragmentShader from '../../assets/shaders/plane_back.frag';
@@ -14,7 +14,7 @@ export function Damier(props) {
 
   const [point, updatePoint] = useState(null);
 
-  const [data, updateData] = useState({
+  const [data] = useState({
     uniforms: {
       uTime: { value: 0 },
       mouse: { value: {x: 0, y: 0 } },
