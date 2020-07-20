@@ -111,7 +111,8 @@ vec4 ambiant(vec3 color){
     float valueStep = smoothstep(-0.3, 0.3, valueGlobal + ((time * 1.2) - .5));
 
     vec4 ambaintColor = vec4(vec3(color * valueStep) + 0.5, valueStep);
-    return ambaintColor * (1. - uOpened) + vec4(1.) * uOpened;
+	
+    return ambaintColor * (1. - uOpened) + vec4(color, 1.) * uOpened;
 }
 
 void main() {

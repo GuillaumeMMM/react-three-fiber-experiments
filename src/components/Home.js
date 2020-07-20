@@ -48,7 +48,6 @@ const Scene = (props) => {
                     updateBringPlaneFront(false);
                     planeFront.material.uniforms.uOpeningStartTime.value = 0;
                     planeFront.material.uniforms.uOpened.value = 1;
-                    console.log('reached in')
                 }
             }
             if (sendPlaneBack) {
@@ -62,7 +61,6 @@ const Scene = (props) => {
                     updatePlaneFrontOpened(false);
                     updateSendPlaneBack(false);
                     planeFront.material.uniforms.uClosingStartTime.value = 0;
-                    console.log('reached out')
                 }
             }
         }
@@ -81,7 +79,7 @@ const Scene = (props) => {
                 uTime: { value: 0 },
                 uOpeningStartTime: {value: 0},
                 uClosingStartTime: {value: 0},
-                uOpened: {value: 0}
+                uOpened: {value: 0},
             },
             transparent: true,
             side: THREE.DoubleSide,
@@ -140,7 +138,7 @@ const Scene = (props) => {
     const quitProject = () => {
         console.log('quitProject');
         updateSendPlaneBack(true);
-    } 
+    }
 
     const updateTranslate = (x, y) => {
         let position = cameraControls.getPosition();

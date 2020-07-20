@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useFrame, useThree } from 'react-three-fiber'
 import planeFragmentShader from '../../assets/shaders/plane.frag';
+import emptyFragShader from '../../assets/shaders/empty.frag';
 import planeBackFragmentShader from '../../assets/shaders/plane_back.frag';
 import planeBackVertexShader from '../../assets/shaders/plane_back.vert';
 import planeVertexShader from '../../assets/shaders/plane.vert';
@@ -13,7 +14,7 @@ export function Damier(props) {
 
   const [point, updatePoint] = useState(null);
 
-  const [data] = useState({
+  const [data, updateData] = useState({
     uniforms: {
       uTime: { value: 0 },
       mouse: { value: {x: 0, y: 0 } },
@@ -225,6 +226,16 @@ export function Damier(props) {
       return (bbox.max.x - bbox.min.x);
     }
   }, []);
+
+  useEffect(() => {
+    if (props.planeFrontOpened) {
+      ref.current.material.fragmentShader = emptyFragShader;
+      ref.current.material.needsUpdate = true;
+    } else {
+      ref.current.material.fragmentShader = planeFragmentShader;
+      ref.current.material.needsUpdate = true;
+    }
+  }, [props.planeFrontOpened])
 
   const dataBack = JSON.parse(JSON.stringify(data));
   dataBack.fragmentShader = planeBackFragmentShader;

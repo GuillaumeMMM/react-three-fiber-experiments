@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import { useFrame } from 'react-three-fiber'
 import objectFragmentShader from '../../assets/shaders/object.frag';
 import objectVertexShader from '../../assets/shaders/object.vert';
+import emptyFragShader from '../../assets/shaders/empty.frag';
 /* global.THREE = require('three'); */
 import * as THREE from 'three';
 import { ShaderMaterial } from 'three';
@@ -123,6 +124,16 @@ export const Cylinder = function (props) {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (props.planeFrontOpened) {
+      cylinder.current.material.fragmentShader = emptyFragShader;
+      cylinder.current.material.needsUpdate = true;
+    } else {
+      cylinder.current.material.fragmentShader = objectFragmentShader;
+      cylinder.current.material.needsUpdate = true;
+    }
+  }, [props.planeFrontOpened])
 
   const onPointerOver = (event) => {
     updateMouseover(true);
