@@ -6,6 +6,7 @@ precision highp float;
 varying vec2 vUv;
 varying vec3 vNormal;
 uniform float uTime;
+uniform vec2 uMouse;
 uniform float uOpeningStartTime;
 uniform float uClosingStartTime;
 uniform float uOpened;
@@ -133,8 +134,14 @@ vec4 ambiant(vec3 color){
     float valueGlobal = simplex3d_fractal(p3*2. + sin(uTime / 20.));
     float valueStep = smoothstep(-0.3, 0.3, valueGlobal + ((time * 1.2) - .5));
     vec4 ambaintColor = vec4(vec3(ambiant2(1.).xyz * valueStep), valueStep);
-	
-    return ambaintColor * (1. - uOpened) + ambiant2(1.) * uOpened;
+
+/* 	vec4 mouseAmbient = vec4(vec3(step(1., distance(Position.xy, uMouse))), 1.); */
+	/* float teta = acos(dot(normalize(uMouse - Position.xy), vec2(1., 0.))) * 0.5;
+	float alphaMouse = 1. - smoothstep(0.01, 0.03 + 0.01333333*(simplex3d(vec3(0., teta, uTime ))), distance(Position.xy, uMouse));
+	vec4 mouseColor = alphaMouse * addAmbiantNoise(Position.xy, vec4(1.0, 0.5098, 0.7961, 1.0), 0.3); */
+
+    /* return ambaintColor * (1. - uOpened) + (ambiant2(1.) * (1. - alphaMouse) + mouseColor) * uOpened; */
+	return ambaintColor * (1. - uOpened) + (ambiant2(1.)) * uOpened;
 }
 
 

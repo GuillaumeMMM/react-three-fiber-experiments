@@ -7,6 +7,8 @@ varying vec3 vNormal;
 uniform float uTime;
 varying vec3 Position;
 
+precision lowp float;
+
 /* discontinuous pseudorandom uniformly distributed in [-0.5, +0.5]^3 */
 vec3 random3(vec3 c) {
 	float j = 4096.0*sin(dot(c,vec3(17.0, 59.4, 15.0)));

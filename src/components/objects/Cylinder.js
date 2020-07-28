@@ -31,7 +31,7 @@ export const Cylinder = function (props) {
 
   useFrame(() => {
     /* cylinder.current.rotation.x += 0.1; */
-    if (!props.planeFrontOpened) {
+    if (!props.planeFrontOpened || props.sendPlaneBack) {
       cylinder.current.material.uniforms.uTime.value += 0.1;
       if (mouseOver && cylinder.current.position.z < initialZPoisiton + 0.5) {
         cylinder.current.position.z += 0.1;
@@ -126,14 +126,14 @@ export const Cylinder = function (props) {
   }, []);
 
   useEffect(() => {
-    if (props.planeFrontOpened) {
+    if (props.planeFrontOpened && !props.sendPlaneBack) {
       cylinder.current.material.fragmentShader = emptyFragShader;
       cylinder.current.material.needsUpdate = true;
     } else {
       cylinder.current.material.fragmentShader = objectFragmentShader;
       cylinder.current.material.needsUpdate = true;
     }
-  }, [props.planeFrontOpened])
+  }, [props.planeFrontOpened, props.sendPlaneBack])
 
   const onPointerOver = (event) => {
     updateMouseover(true);
@@ -145,7 +145,7 @@ export const Cylinder = function (props) {
 
   return (
     <React.Fragment>
-      <mesh position={props.position} onClick={e => props.onObjectClick()} onPointerOver={e => onPointerOver()} onPointerOut={e => onPointerOut()}>
+      <mesh position={props.position} onClick={e => props.onObjectClick(cylinder)} onPointerOver={e => onPointerOver()} onPointerOut={e => onPointerOut()}>
         <sphereGeometry attach="geometry" args={[2, 8, 8]}></sphereGeometry>
         <meshBasicMaterial attach="material" color="red" opacity={0.5} alphaTest={1} transparent={true} side={THREE.DoubleSide} />
       </mesh>

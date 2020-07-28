@@ -7,6 +7,7 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "camera-controls": "^1.21.0",
+    "drei": "0.0.64",
     "glsl-aastep": "^1.0.1",
     "glsl-grid": "^1.0.2",
     "glsl-noise": "0.0.0",
@@ -21,7 +22,8 @@
     "react-scripts": "3.4.1",
     "react-three-fiber": "^4.1.1",
     "three": "^0.115.0",
-    "three-bmfont-text": "^2.3.0"
+    "three-bmfont-text": "^2.3.0",
+    "url-loader": "^4.1.0"
   },
   "scripts": {
     "start": "webpack-dev-server --open --mode development",
@@ -46,6 +48,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/preset-env": "^7.9.6",
     "@babel/preset-react": "^7.9.4",
     "babel-loader": "^8.1.0",

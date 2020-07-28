@@ -64,7 +64,7 @@ export function Damier(props) {
         back.current.position.y = point.y;
       }
 
-    if (!props.planeFrontOpened) {
+    if (!props.planeFrontOpened && !props.sendPlaneBack) {
   
       if (ENABLE_TEXT) {
         if (group.current.children && group.current.children[0] && group.current.children[0].children && group.current.children[0].children.length > 0) {
@@ -228,14 +228,14 @@ export function Damier(props) {
   }, []);
 
   useEffect(() => {
-    if (props.planeFrontOpened) {
+    if (props.planeFrontOpened && !props.sendPlaneBack) {
       ref.current.material.fragmentShader = emptyFragShader;
       ref.current.material.needsUpdate = true;
     } else {
       ref.current.material.fragmentShader = planeFragmentShader;
       ref.current.material.needsUpdate = true;
     }
-  }, [props.planeFrontOpened])
+  }, [props.planeFrontOpened, props.sendPlaneBack])
 
   const dataBack = JSON.parse(JSON.stringify(data));
   dataBack.fragmentShader = planeBackFragmentShader;
@@ -254,14 +254,15 @@ export function Damier(props) {
   }
 
   const onPointerMove = (event) => {
-    if (!props.planeFrontOpened) {
-      const newMouse = mouse.clone();
-      newMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      newMouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-      updateMouse(newMouse);
-      raycaster.setFromCamera(newMouse, props.camera);
-      updateRaycaster(raycaster)
-      var objects = raycaster.intersectObjects(ref.current.parent.children);
+    const newMouse = mouse.clone();
+    newMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    newMouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+    updateMouse(newMouse);
+    raycaster.setFromCamera(newMouse, props.camera);
+    updateRaycaster(raycaster);
+    let objects;
+    if (!props.planeFrontOpened && !props.sendPlaneBack) {
+      objects = raycaster.intersectObjects(ref.current.parent.children);
       updatePoint(objects[0].point);
 
       if (pointerDown) {
@@ -271,6 +272,7 @@ export function Damier(props) {
         updateCurrentDownPosY(event.pageY);
         props.updateTranslate(diffX / 50, diffY / 50);
       }
+    } else {
     }
   }
 

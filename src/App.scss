@@ -6,15 +6,53 @@
     box-sizing: border-box;
 }
 
-.project-content {
+body {
+    font-family: 'IBM Plex Sans', sans-serif;
+}
+
+.canvas-container {
+    overflow: hidden;
+}
+
+.scrollArea {
     position: absolute;
     top: 0;
     left: 0;
     width: 100vw;
-    max-height: 100vh;
-    overflow: scroll;
+    height: 100vh;
 
-    .project-container {
-        width: 200px;
+    .project {
+        color: white;
+        font-weight: 800;
+        font-size: 1.5rem;
+        height: 100vh;
+        overflow: auto;
+
+        .project-container {
+            width: 60vw;
+            margin-left: 20vw;
+            margin-top: 45vh;
+
+            .project-title {
+                font-size: 2rem;
+                font-weight: 1000;
+                margin-bottom: 50px;
+                text-align: center;
+                opacity: 0;
+                transition: opacity 2s;
+                font-weight: 800;
+            }
+    
+            p {
+                margin-bottom: 20px;
+                font-weight: 400;
+            }
+        }
+
+        .project-container-initiated {
+            .project-title {
+                opacity: 1;
+            }
+        }
     }
-}
+  }
